@@ -74,6 +74,7 @@ func (s *Server) attachMiddlewares() {
 func (s *Server) attachHandlers() {
 	s.e.GET("/server/health", s.healthcheckHandler())
 
+	s.e.Static("static", "/services/blog/static")
 	s.e.GET("/", s.IndexHandler())
 
 	s.e.GET("/signup", s.WillSignupHandler())
