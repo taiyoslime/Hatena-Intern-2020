@@ -14,14 +14,14 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	"renderer-go/config"
-	server "renderer-go/grpc"
-	"renderer-go/log"
-	pb "renderer-go/pb/renderer"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-	pb_fetcher "renderer-go/pb/renderer"
+	"renderer-go/config"
+	server "renderer-go/grpc"
+	"renderer-go/log"
+	pb_fetcher "renderer-go/pb/fetcher"
+	pb_renderer "renderer-go/pb/renderer"
 )
 
 func main() {
@@ -71,8 +71,8 @@ func run(args []string) error {
 			grpc_recovery.UnaryServerInterceptor(),
 		)),
 	)
-	svr := server.NewServer()
-	pb.RegisterRendererServer(s, svr)
+	svr := server.NewServer(fetcherCli)
+	pb_renderer.RegisterRendererServer(s, svr)
 	healthpb.RegisterHealthServer(s, svr)
 	go stop(s, conf.GracefulStopTimeout, logger)
 	if err := s.Serve(lis); err != nil {

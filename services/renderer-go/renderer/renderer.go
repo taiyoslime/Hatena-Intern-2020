@@ -7,11 +7,17 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	pb_fetcher "renderer-go/pb/fetcher"
 )
 
 // Render は受け取った文書を HTML に変換する
-func Render(ctx context.Context, src string) (string, error) {
+func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
+	reply, err := fetcherClient.Fetch(ctx, &pb_fetcher.FetchRequest{Url: "https://google.com"})
+	if err != nil {
+		return "error", err
+	}
+	
 	parser := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithParserOptions(
@@ -28,5 +34,5 @@ func Render(ctx context.Context, src string) (string, error) {
 	}
 
 	html := buf.String()
-	return html, nil
+	return html + reply.Title, nil
 }

@@ -46,7 +46,7 @@ func Load() (*Config, error) {
 
 	// FetcherAddr
 	fetcherAddr := os.Getenv("FETCHER_ADDR")
-	if accountAddr == "" {
+	if fetcherAddr == "" {
 		return nil, errors.New("FETCHER_ADDR is not set")
 	}
 	conf.FetcherAddr = fetcherAddr

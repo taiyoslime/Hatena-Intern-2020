@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	pb "renderer-go/pb/renderer"
 	"github.com/stretchr/testify/assert"
+	pb "renderer-go/pb/renderer"
 )
 
 func Test_Server_Render(t *testing.T) {
