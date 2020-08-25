@@ -30,7 +30,7 @@ func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 func fetch(l *autoTitleLinker, url string) string {
 	reply, err := l.fetcherClient.Fetch(l.ctx, &pb_fetcher.FetchRequest{Url: url})
 	if err != nil {
-		return ""
+		return url // titleが得られなかった場合はurlをそのまま返す
 	}
 	return reply.Title
 }
