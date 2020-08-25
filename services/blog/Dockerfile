@@ -19,4 +19,6 @@ COPY --from=builder /services/blog/bin/server /services/blog/bin/server
 RUN adduser -D -u 1000 app
 USER 1000
 
+COPY static/ /services/blog/static/
+
 ENTRYPOINT ["/services/blog/bin/server"]
