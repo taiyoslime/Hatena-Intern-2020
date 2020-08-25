@@ -21,6 +21,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	pb_fetcher "renderer-go/pb/renderer"
 )
 
 func main() {
@@ -36,6 +37,13 @@ func run(args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %+v", err)
 	}
+
+	fetcherConn, err := grpc.Dial(conf.FetcherAddr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return fmt.Errorf("failed to connect to fetcher service: %+v", err)
+	}
+	defer fetcherConn.Close()
+	fetcherCli := pb_fetcher.NewFetcherClient(fetcherConn)
 
 	// ロガーを初期化
 	logger, err := log.NewLogger(log.Config{Mode: conf.Mode})

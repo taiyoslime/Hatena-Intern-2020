@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	pb "fetcher/pb/fetcher"
 	"fetcher/fetch"
+	pb "fetcher/pb/fetcher"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -18,7 +18,6 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{}
 }
-
 
 func (s *Server) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.FetchReply, error) {
 	title, err := fetcher.Fetch(ctx, in.Url)
