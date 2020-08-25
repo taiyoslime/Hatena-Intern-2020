@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	pb "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/renderer"
-	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/renderer"
+	pb "renderer-go/pb/renderer"
+	"renderer-go/renderer"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
