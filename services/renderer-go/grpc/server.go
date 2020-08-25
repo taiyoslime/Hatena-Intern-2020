@@ -27,7 +27,7 @@ func NewServer(fetcherClient pb_fetcher.FetcherClient) *Server {
 func (s *Server) Render(ctx context.Context, in *pb_renderer.RenderRequest) (*pb_renderer.RenderReply, error) {
 	html, err := renderer.Render(ctx, s.fetcherClient, in.Src)
 	if err != nil {
-		return nil, err
+		return &pb_renderer.RenderReply{Html: in.Src}, err // 何らかのエラーが出た場合は貰ったsrcをそのまま返す
 	}
 	return &pb_renderer.RenderReply{Html: html}, nil
 }

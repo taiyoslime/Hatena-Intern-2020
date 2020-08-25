@@ -4,13 +4,20 @@ import (
 	"context"
 	"testing"
 
+	pb_fetcher "renderer-go/pb/fetcher"
+	utils "renderer-go/utils"
+
 	"github.com/stretchr/testify/assert"
 )
 
 type RenderTestCase struct {
 	in  string
 	out string
+	err bool 
+	fetchErr bool // fetcherがerrorを返してくるようなな入力かどうか
 }
+
+var dummyFetchText = "DUMMY"
 
 var renderTestCases = []RenderTestCase{
 	{
@@ -30,13 +37,45 @@ var renderTestCases = []RenderTestCase{
 <li><a href="https://taiyosli.me">piyo</a></li>
 </ul>
 `,
+		err: false,
+		fetchErr: false,
+	},
+	{
+		in: `- [](https://google.com)`,
+		out: `<ul>
+<li><a href="https://google.com">` + dummyFetchText + `</a></li>
+</ul>
+`,
+		err: false,
+		fetchErr: false,
+
+	},
+	{
+		in: `- [](https://does.not.work)`,
+		out: `<ul>
+<li><a href="https://does.not.work">https://does.not.work</a></li>
+</ul>
+`,
+		err: false,
+		fetchErr: true,
 	},
 }
 
 func Test_Render(t *testing.T) {
 	for _, testCase := range renderTestCases {
-		html, err := Render(context.Background(), nil, testCase.in)
-		assert.NoError(t, err)
+		var testFetcerClient pb_fetcher.FetcherClient
+		if !testCase.fetchErr {
+			testFetcerClient = utils.CreateTestFetcherClient(func(src string) string { return dummyFetchText })
+		} else {
+			testFetcerClient = utils.CreateTestFetcherClientWithError(func(src string) string { return dummyFetchText })
+		}
+
+		html, err := Render(context.Background(), testFetcerClient, testCase.in)
+		if !testCase.err{
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
 		assert.Equal(t, html, testCase.out)
 	}
 }
