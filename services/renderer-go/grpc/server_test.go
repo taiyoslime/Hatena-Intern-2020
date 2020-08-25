@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	pb "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/renderer"
+	pb "renderer-go/pb/renderer"
 	"github.com/stretchr/testify/assert"
 )
 
