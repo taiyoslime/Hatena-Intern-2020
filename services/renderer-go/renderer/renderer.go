@@ -14,20 +14,20 @@ import (
 )
 
 type autoTitleLinker struct {
-	ctx context.Context
+	ctx           context.Context
 	fetcherClient pb_fetcher.FetcherClient
 }
 
 func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			node.AppendChild(node, ast.NewString([]byte(fetch(l , string(node.Destination)))))
+			node.AppendChild(node, ast.NewString([]byte(fetch(l, string(node.Destination)))))
 		}
 		return ast.WalkContinue, nil
 	})
 }
 
-func fetch(l *autoTitleLinker, url string) string{
+func fetch(l *autoTitleLinker, url string) string {
 	reply, err := l.fetcherClient.Fetch(l.ctx, &pb_fetcher.FetchRequest{Url: url})
 	if err != nil {
 		return ""
@@ -42,7 +42,7 @@ func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src str
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(
-				util.Prioritized(&autoTitleLinker{ctx, fetcherClient,}, 99),
+				util.Prioritized(&autoTitleLinker{ctx, fetcherClient}, 99),
 			),
 			parser.WithAutoHeadingID(),
 		),
