@@ -133,12 +133,12 @@ var file_fetcher_proto_rawDesc = []byte{
 	0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x22, 0x0a, 0x0a, 0x46, 0x65,
 	0x74, 0x63, 0x68, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c,
-	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x32, 0x40,
-	0x0a, 0x07, 0x46, 0x65, 0x74, 0x63, 0x68, 0x65, 0x72, 0x12, 0x35, 0x0a, 0x07, 0x46, 0x65, 0x74,
-	0x63, 0x68, 0x65, 0x72, 0x12, 0x15, 0x2e, 0x66, 0x65, 0x74, 0x63, 0x68, 0x65, 0x72, 0x2e, 0x46,
-	0x65, 0x74, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x66, 0x65,
-	0x74, 0x63, 0x68, 0x65, 0x72, 0x2e, 0x46, 0x65, 0x74, 0x63, 0x68, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x32, 0x3e,
+	0x0a, 0x07, 0x46, 0x65, 0x74, 0x63, 0x68, 0x65, 0x72, 0x12, 0x33, 0x0a, 0x05, 0x46, 0x65, 0x74,
+	0x63, 0x68, 0x12, 0x15, 0x2e, 0x66, 0x65, 0x74, 0x63, 0x68, 0x65, 0x72, 0x2e, 0x46, 0x65, 0x74,
+	0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x66, 0x65, 0x74, 0x63,
+	0x68, 0x65, 0x72, 0x2e, 0x46, 0x65, 0x74, 0x63, 0x68, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -159,8 +159,8 @@ var file_fetcher_proto_goTypes = []interface{}{
 	(*FetchReply)(nil),   // 1: fetcher.FetchReply
 }
 var file_fetcher_proto_depIdxs = []int32{
-	0, // 0: fetcher.Fetcher.Fetcher:input_type -> fetcher.FetchRequest
-	1, // 1: fetcher.Fetcher.Fetcher:output_type -> fetcher.FetchReply
+	0, // 0: fetcher.Fetcher.Fetch:input_type -> fetcher.FetchRequest
+	1, // 1: fetcher.Fetcher.Fetch:output_type -> fetcher.FetchReply
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -231,7 +231,7 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type FetcherClient interface {
-	Fetcher(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchReply, error)
+	Fetch(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchReply, error)
 }
 
 type fetcherClient struct {
@@ -242,9 +242,9 @@ func NewFetcherClient(cc grpc.ClientConnInterface) FetcherClient {
 	return &fetcherClient{cc}
 }
 
-func (c *fetcherClient) Fetcher(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchReply, error) {
+func (c *fetcherClient) Fetch(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchReply, error) {
 	out := new(FetchReply)
-	err := c.cc.Invoke(ctx, "/fetcher.Fetcher/Fetcher", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/fetcher.Fetcher/Fetch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -253,35 +253,35 @@ func (c *fetcherClient) Fetcher(ctx context.Context, in *FetchRequest, opts ...g
 
 // FetcherServer is the server API for Fetcher service.
 type FetcherServer interface {
-	Fetcher(context.Context, *FetchRequest) (*FetchReply, error)
+	Fetch(context.Context, *FetchRequest) (*FetchReply, error)
 }
 
 // UnimplementedFetcherServer can be embedded to have forward compatible implementations.
 type UnimplementedFetcherServer struct {
 }
 
-func (*UnimplementedFetcherServer) Fetcher(context.Context, *FetchRequest) (*FetchReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Fetcher not implemented")
+func (*UnimplementedFetcherServer) Fetch(context.Context, *FetchRequest) (*FetchReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Fetch not implemented")
 }
 
 func RegisterFetcherServer(s *grpc.Server, srv FetcherServer) {
 	s.RegisterService(&_Fetcher_serviceDesc, srv)
 }
 
-func _Fetcher_Fetcher_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Fetcher_Fetch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FetchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FetcherServer).Fetcher(ctx, in)
+		return srv.(FetcherServer).Fetch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fetcher.Fetcher/Fetcher",
+		FullMethod: "/fetcher.Fetcher/Fetch",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FetcherServer).Fetcher(ctx, req.(*FetchRequest))
+		return srv.(FetcherServer).Fetch(ctx, req.(*FetchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -291,8 +291,8 @@ var _Fetcher_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*FetcherServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Fetcher",
-			Handler:    _Fetcher_Fetcher_Handler,
+			MethodName: "Fetch",
+			Handler:    _Fetcher_Fetch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
