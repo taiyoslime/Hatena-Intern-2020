@@ -10,8 +10,8 @@ import (
 
 func Test_Server_Fetch(t *testing.T) {
 	s := NewServer()
-	url := "https://taiyosli.me"
+	url := "https://hatenablog.com/"
 	reply, err := s.Fetch(context.Background(), &pb.FetchRequest{Url: url})
 	assert.NoError(t, err)
-	assert.Equal(t, "https://taiyosli.me", reply.Title)
+	assert.Equal(t, "はてなブログ", reply.Title)
 }

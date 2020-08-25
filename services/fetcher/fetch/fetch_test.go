@@ -8,8 +8,8 @@ import (
 )
 
 func Test_Fetch(t *testing.T) {
-	url := "https://taiyosli.me"
+	url := "https://google.com"
 	html, err := Fetch(context.Background(), url)
 	assert.NoError(t, err)
-	assert.Equal(t, `https://taiyosli.me`, html)
+	assert.Equal(t, `Google`, html)
 }
