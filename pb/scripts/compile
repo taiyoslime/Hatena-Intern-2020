@@ -39,7 +39,19 @@ docker run -v "$(pwd):/pb" -w /pb --rm hatena-intern-2020-protoc-ts \
     --grpc_out=ts/renderer \
     --ts_out=ts/renderer \
     renderer.proto
-mkdir -p ../services/renderer-go/pb ../services/renderer-ts/pb ../services/blog/pb
+
+mkdir -p go/fetcher
+docker run -v "$(pwd):/pb" -w /pb --rm hatena-intern-2020-protoc-go \
+  protoc \
+    --go_out=plugins=grpc:go/fetcher \
+    --go_opt=paths=source_relative \
+    fetcher.proto
+
+mkdir -p ../services/renderer-go/pb ../services/renderer-ts/pb ../services/blog/pb ../services/fetcher/pb
 cp -r ./go/renderer ../services/renderer-go/pb
 cp -r ./ts/renderer ../services/renderer-ts/pb
 cp -r ./go/renderer ../services/blog/pb
+
+cp -r ./go/renderer ../services/fetcher/pb
+cp -r ./go/fetcher ../services/renderer-go/pb
+cp -r ./go/fetcher ../services/fetcher/pb

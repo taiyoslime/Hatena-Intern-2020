@@ -10,6 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"fetcher/config"
+	server "fetcher/grpc"
+	"fetcher/log"
+	pb "fetcher/pb/fetcher"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -17,11 +21,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-	"renderer-go/config"
-	server "renderer-go/grpc"
-	"renderer-go/log"
-	pb_fetcher "renderer-go/pb/fetcher"
-	pb_renderer "renderer-go/pb/renderer"
 )
 
 func main() {
@@ -37,13 +36,6 @@ func run(args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %+v", err)
 	}
-
-	fetcherConn, err := grpc.Dial(conf.FetcherAddr, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return fmt.Errorf("failed to connect to fetcher service: %+v", err)
-	}
-	defer fetcherConn.Close()
-	fetcherCli := pb_fetcher.NewFetcherClient(fetcherConn)
 
 	// ロガーを初期化
 	logger, err := log.NewLogger(log.Config{Mode: conf.Mode})
@@ -71,8 +63,8 @@ func run(args []string) error {
 			grpc_recovery.UnaryServerInterceptor(),
 		)),
 	)
-	svr := server.NewServer(fetcherCli)
-	pb_renderer.RegisterRendererServer(s, svr)
+	svr := server.NewServer()
+	pb.RegisterFetcherServer(s, svr)
 	healthpb.RegisterHealthServer(s, svr)
 	go stop(s, conf.GracefulStopTimeout, logger)
 	if err := s.Serve(lis); err != nil {
