@@ -31,6 +31,23 @@ var fetchTestCases = []FetchTestCase{
 		out: "",
 		err: true,
 	},
+	/*
+		http://dev.taiyosli.me/robots.txt
+
+		User-agent: *
+		Disallow: /disallow
+		Allow: /disallow/allow
+	*/
+	{
+		in:  "http://dev.taiyosli.me/disallow",
+		out: "",
+		err: true,
+	},
+	{
+		in:  "http://dev.taiyosli.me/disallow/allow",
+		out: "OK",
+		err: false,
+	},
 }
 
 func Test_Fetch(t *testing.T) {
@@ -42,7 +59,6 @@ func Test_Fetch(t *testing.T) {
 		} else {
 			assert.Error(t, err)
 		}
-
 		assert.Equal(t, title, testCase.out)
 	}
 }
