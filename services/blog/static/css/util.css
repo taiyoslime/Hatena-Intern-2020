@@ -1,3 +1,16 @@
 section > h1{
     font-size: 2.0em;
-};
+}
+
+.spoiler-container {
+}
+
+.spoiler {
+    -ms-filter: blur(8px);
+    filter: blur(8px);
+}
+
+.spoiler:hover, .spoiler:active {
+    -ms-filter: blur(0px);
+    filter: blur(0px);
+}
