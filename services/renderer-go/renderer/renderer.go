@@ -17,46 +17,50 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-type lookUpBlankTitle struct {
-	dest []string
-}
-
-func (l *lookUpBlankTitle) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
-	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
-		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			l.dest = append(l.dest, string(node.Destination))
-		}
-		return ast.WalkContinue, nil
-	})
-}
-
 type autoTitleLinker struct {
-	titleMap *map[string]string
-}
-
-func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
-	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
-		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			node.AppendChild(node, ast.NewString([]byte((*(a.titleMap))[string(node.Destination)])))
-		}
-		return ast.WalkContinue, nil
-	})
-}
-
-type fetcherStruct struct {
 	ctx           context.Context
 	fetcherClient pb_fetcher.FetcherClient
 }
 
-func createFetcher(ctx context.Context, fetcherClient pb_fetcher.FetcherClient) *fetcherStruct {
-	return &fetcherStruct{
+func createAutoTitleLinker(ctx context.Context, fetcherClient pb_fetcher.FetcherClient) *autoTitleLinker {
+	return &autoTitleLinker{
 		ctx:           ctx,
 		fetcherClient: fetcherClient,
 	}
 }
 
-func (f *fetcherStruct) fetch(url string) string {
-	reply, err := f.fetcherClient.Fetch(f.ctx, &pb_fetcher.FetchRequest{Url: url})
+func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+	var dest []string
+
+	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
+			dest = append(dest, string(node.Destination))
+		}
+		return ast.WalkContinue, nil
+	})
+
+	titleMap := map[string]string{}
+
+	var wg sync.WaitGroup
+	for _, url := range dest {
+		wg.Add(1)
+		go func(url string) {
+			titleMap[url] = a.fetch(url)
+			wg.Done()
+		}(url)
+	}
+	wg.Wait()
+
+	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
+			node.AppendChild(node, ast.NewString([]byte(titleMap[string(node.Destination)])))
+		}
+		return ast.WalkContinue, nil
+	})
+}
+
+func (a *autoTitleLinker) fetch(url string) string {
+	reply, err := a.fetcherClient.Fetch(a.ctx, &pb_fetcher.FetchRequest{Url: url})
 	if err != nil {
 		return url // titleが得られなかった場合はurlをそのまま返す
 	}
@@ -66,36 +70,7 @@ func (f *fetcherStruct) fetch(url string) string {
 // Render は受け取った文書を HTML に変換する
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
-	var lookup = &lookUpBlankTitle{}
-
-	preParser := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
-		goldmark.WithParserOptions(
-			parser.WithASTTransformers(
-				util.Prioritized(lookup, 99),
-			),
-		),
-	)
-	var prebuf bytes.Buffer
-	if err := preParser.Convert([]byte(src), &prebuf); err != nil {
-		return src, err
-	}
-
-	fetcher := createFetcher(ctx, fetcherClient)
-
-	titleMap := make(map[string]string)
-
-	var wg sync.WaitGroup
-	for _, url := range lookup.dest {
-		wg.Add(1)
-		go func(url string) {
-			titleMap[url] = fetcher.fetch(url)
-			wg.Done()
-		}(url)
-	}
-	wg.Wait()
-
-	linker := &autoTitleLinker{&titleMap}
+	linker := &autoTitleLinker{ctx, fetcherClient}
 
 	parser := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
