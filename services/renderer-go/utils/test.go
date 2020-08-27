@@ -1,12 +1,11 @@
-package utils 
+package utils
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"errors"
+	"google.golang.org/grpc"
 	pb_fetcher "renderer-go/pb/fetcher"
 )
-
 
 type TestFetcherClient struct {
 	Error       error

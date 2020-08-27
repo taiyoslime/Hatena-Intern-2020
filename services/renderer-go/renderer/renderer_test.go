@@ -11,9 +11,9 @@ import (
 )
 
 type RenderTestCase struct {
-	in  string
-	out string
-	err bool 
+	in       string
+	out      string
+	err      bool
 	fetchErr bool // fetcherがerrorを返してくるようなな入力かどうか
 }
 
@@ -37,7 +37,7 @@ var renderTestCases = []RenderTestCase{
 <li><a href="https://taiyosli.me">piyo</a></li>
 </ul>
 `,
-		err: false,
+		err:      false,
 		fetchErr: false,
 	},
 	{
@@ -46,9 +46,8 @@ var renderTestCases = []RenderTestCase{
 <li><a href="https://google.com">` + dummyFetchText + `</a></li>
 </ul>
 `,
-		err: false,
+		err:      false,
 		fetchErr: false,
-
 	},
 	{
 		in: `- [](https://does.not.work)`,
@@ -56,8 +55,45 @@ var renderTestCases = []RenderTestCase{
 <li><a href="https://does.not.work">https://does.not.work</a></li>
 </ul>
 `,
-		err: false,
+		err:      false,
 		fetchErr: true,
+	},
+	{
+		in: `%%%
+hogefuga
+hogefuga
+%%%
+`,
+		out: `<div class="spoiler-container"><div class="spoiler">
+hogefuga<br>
+hogefuga<br>
+</div></div>
+`,
+		err:      false,
+		fetchErr: false,
+	},
+	{
+		in: `
+%%%
+fuga
+%%%
+
+hoge
+
+%%%
+piyo
+%%%
+`,
+		out: `<div class="spoiler-container"><div class="spoiler">
+fuga<br>
+</div></div>
+<p>hoge</p>
+<div class="spoiler-container"><div class="spoiler">
+piyo<br>
+</div></div>
+`,
+		err:      false,
+		fetchErr: false,
 	},
 }
 
@@ -71,11 +107,11 @@ func Test_Render(t *testing.T) {
 		}
 
 		html, err := Render(context.Background(), testFetcerClient, testCase.in)
-		if !testCase.err{
+		if !testCase.err {
 			assert.NoError(t, err)
 		} else {
 			assert.Error(t, err)
 		}
-		assert.Equal(t, html, testCase.out)
+		assert.Equal(t, testCase.out, html)
 	}
 }

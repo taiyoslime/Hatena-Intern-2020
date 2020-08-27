@@ -3,6 +3,10 @@ package renderer
 import (
 	"bytes"
 	"context"
+	pb_fetcher "renderer-go/pb/fetcher"
+
+	lextension "renderer-go/renderer/extension"
+
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -10,7 +14,6 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
-	pb_fetcher "renderer-go/pb/fetcher"
 )
 
 type autoTitleLinker struct {
@@ -48,6 +51,10 @@ func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src str
 		),
 		goldmark.WithRendererOptions(
 			html.WithHardWraps(),
+			html.WithUnsafe(),
+		),
+		goldmark.WithExtensions(
+			lextension.SpoilerBlock(),
 		),
 	)
 
