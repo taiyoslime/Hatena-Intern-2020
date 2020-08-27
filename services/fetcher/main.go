@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	cache "github.com/patrickmn/go-cache"
+
 	"fetcher/config"
 	server "fetcher/grpc"
 	"fetcher/log"
@@ -63,7 +65,12 @@ func run(args []string) error {
 			grpc_recovery.UnaryServerInterceptor(),
 		)),
 	)
-	svr := server.NewServer()
+
+	var cacheExpiration time.Duration = 5 * time.Hour
+	var cachePurge time.Duration = 30 * time.Minute
+	var cache = cache.New(cacheExpiration, cachePurge)
+
+	svr := server.NewServer(cache)
 	pb.RegisterFetcherServer(s, svr)
 	healthpb.RegisterHealthServer(s, svr)
 	go stop(s, conf.GracefulStopTimeout, logger)
