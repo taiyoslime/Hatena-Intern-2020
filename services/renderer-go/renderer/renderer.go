@@ -8,6 +8,8 @@ import (
 
 	lextension "renderer-go/renderer/extension"
 
+	"github.com/microcosm-cc/bluemonday"
+
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -69,6 +71,8 @@ func (a *autoTitleLinker) fetch(url string) string {
 	return reply.Title
 }
 
+var p = bluemonday.UGCPolicy()
+
 // Render は受け取った文書を HTML に変換する
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
@@ -96,6 +100,7 @@ func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src str
 		return src, err
 	}
 
-	html := buf.String()
+	html := p.Sanitize(buf.String())
+
 	return html, nil
 }
