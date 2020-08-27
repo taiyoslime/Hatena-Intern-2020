@@ -39,13 +39,14 @@ func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 		return ast.WalkContinue, nil
 	})
 
-	titleMap := map[string]string{}
+	var titleMap sync.Map
 
 	var wg sync.WaitGroup
 	for _, url := range dest {
 		wg.Add(1)
 		go func(url string) {
-			titleMap[url] = a.fetch(url)
+			title := a.fetch(url)
+			titleMap.Store(url, title)
 			wg.Done()
 		}(url)
 	}
@@ -53,7 +54,8 @@ func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			node.AppendChild(node, ast.NewString([]byte(titleMap[string(node.Destination)])))
+			title, _ := titleMap.Load(string(node.Destination))
+			node.AppendChild(node, ast.NewString([]byte(title.(string))))
 		}
 		return ast.WalkContinue, nil
 	})
