@@ -59,15 +59,15 @@ var renderTestCases = []RenderTestCase{
 		fetchErr: true,
 	},
 	{
-		in: `%%%
-hogefuga
-hogefuga
-%%%
+		in: `- [](https://example1.com)
+- [](https://example2.com)
+- [](https://example3.com)
 `,
-		out: `<div class="spoiler-container"><div class="spoiler">
-hogefuga<br>
-hogefuga<br>
-</div></div>
+		out: `<ul>
+<li><a href="https://example1.com">DUMMY</a></li>
+<li><a href="https://example2.com">DUMMY</a></li>
+<li><a href="https://example3.com">DUMMY</a></li>
+</ul>
 `,
 		err:      false,
 		fetchErr: false,

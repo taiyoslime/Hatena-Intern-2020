@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	pb_fetcher "renderer-go/pb/fetcher"
+	"sync"
 
 	lextension "renderer-go/renderer/extension"
 
@@ -21,17 +22,47 @@ type autoTitleLinker struct {
 	fetcherClient pb_fetcher.FetcherClient
 }
 
-func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+func createAutoTitleLinker(ctx context.Context, fetcherClient pb_fetcher.FetcherClient) *autoTitleLinker {
+	return &autoTitleLinker{
+		ctx:           ctx,
+		fetcherClient: fetcherClient,
+	}
+}
+
+func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+	var dest []string
+
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			node.AppendChild(node, ast.NewString([]byte(fetch(l, string(node.Destination)))))
+			dest = append(dest, string(node.Destination))
+		}
+		return ast.WalkContinue, nil
+	})
+
+	var titleMap sync.Map
+
+	var wg sync.WaitGroup
+	for _, url := range dest {
+		wg.Add(1)
+		go func(url string) {
+			title := a.fetch(url)
+			titleMap.Store(url, title)
+			wg.Done()
+		}(url)
+	}
+	wg.Wait()
+
+	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
+			title, _ := titleMap.Load(string(node.Destination))
+			node.AppendChild(node, ast.NewString([]byte(title.(string))))
 		}
 		return ast.WalkContinue, nil
 	})
 }
 
-func fetch(l *autoTitleLinker, url string) string {
-	reply, err := l.fetcherClient.Fetch(l.ctx, &pb_fetcher.FetchRequest{Url: url})
+func (a *autoTitleLinker) fetch(url string) string {
+	reply, err := a.fetcherClient.Fetch(a.ctx, &pb_fetcher.FetchRequest{Url: url})
 	if err != nil {
 		return url // titleが得られなかった場合はurlをそのまま返す
 	}
@@ -41,11 +72,13 @@ func fetch(l *autoTitleLinker, url string) string {
 // Render は受け取った文書を HTML に変換する
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
+	linker := &autoTitleLinker{ctx, fetcherClient}
+
 	parser := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(
-				util.Prioritized(&autoTitleLinker{ctx, fetcherClient}, 99),
+				util.Prioritized(linker, 99),
 			),
 			parser.WithAutoHeadingID(),
 		),
