@@ -24,10 +24,6 @@ func (p *spoilerParser) Trigger() []byte {
 }
 
 func (p *spoilerParser) Open(parent gast.Node, reader text.Reader, pc parser.Context) (gast.Node, parser.State) {
-	linenum, _ := reader.Position()
-	if linenum != 0 {
-		return nil, parser.NoChildren
-	}
 	line, _ := reader.PeekLine()
 	if len(line) > 3 && reflect.DeepEqual(line[0:3], []byte("%%%")) {
 		node := ast.CreateSpoilerBlock()

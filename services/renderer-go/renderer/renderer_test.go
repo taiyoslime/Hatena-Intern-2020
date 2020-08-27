@@ -72,6 +72,29 @@ hogefuga<br>
 		err:      false,
 		fetchErr: false,
 	},
+	{
+		in: `
+%%%
+fuga
+%%%
+
+hoge
+
+%%%
+piyo
+%%%
+`,
+		out: `<div class="spoiler-container"><div class="spoiler">
+fuga<br>
+</div></div>
+<p>hoge</p>
+<div class="spoiler-container"><div class="spoiler">
+piyo<br>
+</div></div>
+`,
+		err:      false,
+		fetchErr: false,
+	},
 }
 
 func Test_Render(t *testing.T) {
