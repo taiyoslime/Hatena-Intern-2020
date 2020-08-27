@@ -5,20 +5,18 @@ import (
 	"errors"
 	"net/http"
 	_url "net/url"
-	"time"
-	_cache "github.com/patrickmn/go-cache"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/temoto/robotstxt"
 )
 
-var cacheExpiration time.Duration = 30 * time.Minute
-var cachePurge time.Duration = 10 * time.Minute
-
-var cache = _cache.New(cacheExpiration, cachePurge)
+type CacheClient interface {
+	Get(string) (interface{}, bool)
+	SetDefault(string, interface{})
+}
 
 // Fetch は受け取った文書を HTML に変換する
-func Fetch(ctx context.Context, url string) (string, error) {
+func Fetch(ctx context.Context, cache CacheClient, url string) (string, error) {
 	client := &http.Client{}
 
 	// キャッシュにあるならそれを返すようにする
@@ -53,7 +51,7 @@ func Fetch(ctx context.Context, url string) (string, error) {
 	}
 
 	title := doc.Find("title").Text()
-	cache.Set(url, title, cacheExpiration)
+	cache.SetDefault(url, title)
 	return title, nil
 }
 
@@ -67,7 +65,7 @@ func isAllowed(ctx context.Context, url string, client *http.Client) bool {
 	scheme := u.Scheme
 	path := u.Path
 
-	req, err := http.NewRequest("GET", scheme + "://" + host + "/robots.txt", nil)
+	req, err := http.NewRequest("GET", scheme+"://"+host+"/robots.txt", nil)
 	if err != nil {
 		return false
 	}
@@ -83,8 +81,7 @@ func isAllowed(ctx context.Context, url string, client *http.Client) bool {
 		if err == nil {
 			group := robots.FindGroup(req.UserAgent())
 			allow := group.Test(path)
-			delay := group.CrawlDelay
-			if !allow || delay > cacheExpiration {
+			if !allow {
 				return false
 			}
 		}
