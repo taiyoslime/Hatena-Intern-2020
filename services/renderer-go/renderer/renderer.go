@@ -77,7 +77,7 @@ func (a *autoTitleLinker) fetch(url string) string {
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
 	var p = bluemonday.UGCPolicy()
-	 p.AllowStandardAttributes()
+	p.AllowStandardAttributes()
 	p.AllowStyling()
 
 	linker := &autoTitleLinker{ctx, fetcherClient}
