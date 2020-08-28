@@ -32,13 +32,13 @@ var serverRenderTestCases = []ServerRenderTestCase{
 <ul>
 <li>hoge</li>
 <li>fuga</li>
-<li><a href="https://taiyosli.me">piyo</a></li>
+<li><a href="https://taiyosli.me" rel="nofollow">piyo</a></li>
 </ul>
 `,
 	}, {
 		in: `- [](https://google.com)`,
 		out: `<ul>
-<li><a href="https://google.com">` + dummyFetchText + `</a></li>
+<li><a href="https://google.com" rel="nofollow">` + dummyFetchText + `</a></li>
 </ul>
 `,
 	},

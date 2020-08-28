@@ -8,6 +8,8 @@ import (
 
 	lextension "renderer-go/renderer/extension"
 
+	"github.com/microcosm-cc/bluemonday"
+
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -45,8 +47,10 @@ func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 	for _, url := range dest {
 		wg.Add(1)
 		go func(url string) {
-			title := a.fetch(url)
-			titleMap.Store(url, title)
+			if _, ok := titleMap.Load(url); !ok {
+				title := a.fetch(url)
+				titleMap.Store(url, title)
+			}
 			wg.Done()
 		}(url)
 	}
@@ -72,6 +76,10 @@ func (a *autoTitleLinker) fetch(url string) string {
 // Render は受け取った文書を HTML に変換する
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
+	var p = bluemonday.UGCPolicy()
+	p.AllowStandardAttributes()
+	p.AllowStyling()
+
 	linker := &autoTitleLinker{ctx, fetcherClient}
 
 	parser := goldmark.New(
@@ -96,6 +104,7 @@ func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src str
 		return src, err
 	}
 
-	html := buf.String()
+	html := p.Sanitize(buf.String())
+
 	return html, nil
 }

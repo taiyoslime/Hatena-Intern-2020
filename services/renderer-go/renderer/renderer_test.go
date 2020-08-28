@@ -34,7 +34,7 @@ var renderTestCases = []RenderTestCase{
 <ul>
 <li>hoge</li>
 <li>fuga</li>
-<li><a href="https://taiyosli.me">piyo</a></li>
+<li><a href="https://taiyosli.me" rel="nofollow">piyo</a></li>
 </ul>
 `,
 		err:      false,
@@ -43,7 +43,7 @@ var renderTestCases = []RenderTestCase{
 	{
 		in: `- [](https://google.com)`,
 		out: `<ul>
-<li><a href="https://google.com">` + dummyFetchText + `</a></li>
+<li><a href="https://google.com" rel="nofollow">` + dummyFetchText + `</a></li>
 </ul>
 `,
 		err:      false,
@@ -52,7 +52,7 @@ var renderTestCases = []RenderTestCase{
 	{
 		in: `- [](https://does.not.work)`,
 		out: `<ul>
-<li><a href="https://does.not.work">https://does.not.work</a></li>
+<li><a href="https://does.not.work" rel="nofollow">https://does.not.work</a></li>
 </ul>
 `,
 		err:      false,
@@ -64,9 +64,9 @@ var renderTestCases = []RenderTestCase{
 - [](https://example3.com)
 `,
 		out: `<ul>
-<li><a href="https://example1.com">DUMMY</a></li>
-<li><a href="https://example2.com">DUMMY</a></li>
-<li><a href="https://example3.com">DUMMY</a></li>
+<li><a href="https://example1.com" rel="nofollow">DUMMY</a></li>
+<li><a href="https://example2.com" rel="nofollow">DUMMY</a></li>
+<li><a href="https://example3.com" rel="nofollow">DUMMY</a></li>
 </ul>
 `,
 		err:      false,
