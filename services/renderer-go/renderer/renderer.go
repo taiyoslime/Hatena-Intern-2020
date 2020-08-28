@@ -71,10 +71,12 @@ func (a *autoTitleLinker) fetch(url string) string {
 	return reply.Title
 }
 
-var p = bluemonday.UGCPolicy()
-
 // Render は受け取った文書を HTML に変換する
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
+
+	var p = bluemonday.UGCPolicy()
+	p.AllowStandardAttributes()
+	p.AllowStyling()
 
 	linker := &autoTitleLinker{ctx, fetcherClient}
 
