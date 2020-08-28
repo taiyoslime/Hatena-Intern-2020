@@ -8,6 +8,7 @@ section > h1{
 .spoiler {
     -ms-filter: blur(8px);
     filter: blur(8px);
+    transition: filter 0.1s;
 }
 
 .spoiler:hover, .spoiler:active {
