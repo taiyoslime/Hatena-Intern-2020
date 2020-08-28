@@ -47,8 +47,10 @@ func (a *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 	for _, url := range dest {
 		wg.Add(1)
 		go func(url string) {
-			title := a.fetch(url)
-			titleMap.Store(url, title)
+			if _, ok := titleMap.Load(url); !ok {
+				title := a.fetch(url)
+				titleMap.Store(url, title)
+			}
 			wg.Done()
 		}(url)
 	}
@@ -75,7 +77,7 @@ func (a *autoTitleLinker) fetch(url string) string {
 func Render(ctx context.Context, fetcherClient pb_fetcher.FetcherClient, src string) (string, error) {
 
 	var p = bluemonday.UGCPolicy()
-	p.AllowStandardAttributes()
+	 p.AllowStandardAttributes()
 	p.AllowStyling()
 
 	linker := &autoTitleLinker{ctx, fetcherClient}
